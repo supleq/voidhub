@@ -1,0 +1,194 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Valid keys (case-insensitive, ignores dashes/spaces)
+local validKeys = {
+    ["ejwmeuskkenhkwpqzkzu"] = true,  -- Ejwm-eusk-KenH-Kwpq-ZkZu
+    ["jnco"] = true
+}
+
+-- Void Key GUI - styled exactly like the original
+local gui = Instance.new("ScreenGui")
+gui.Name = "VoidKey"
+gui.ResetOnSpawn = false
+gui.Parent = playerGui
+
+-- Main Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 300, 0, 220)
+frame.Position = UDim2.new(0.5, -150, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+frame.BackgroundTransparency = 0.2
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 12)
+
+-- Purple gradient stroke
+local frameStroke = Instance.new("UIStroke")
+frameStroke.Thickness = 1.5
+frameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+frameStroke.Parent = frame
+
+local frameGradient = Instance.new("UIGradient")
+frameGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(128, 0, 128)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(128, 0, 128))
+}
+frameGradient.Rotation = 45
+frameGradient.Parent = frameStroke
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 32)
+titleBar.BackgroundColor3 = Color3.fromRGB(50, 0, 50)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = frame
+
+local title = Instance.new("TextLabel")
+title.Text = "Void Key"
+title.Size = UDim2.new(1, -80, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Parent = titleBar
+
+-- Minimize Button
+local minimize = Instance.new("TextButton")
+minimize.Text = "-"
+minimize.Size = UDim2.new(0, 32, 0, 32)
+minimize.Position = UDim2.new(1, -36, 0, 0)
+minimize.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+minimize.BackgroundTransparency = 0.1
+minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimize.Font = Enum.Font.GothamBold
+minimize.TextSize = 18
+minimize.Parent = titleBar
+
+local minCorner = Instance.new("UICorner", minimize)
+minCorner.CornerRadius = UDim.new(0, 8)
+
+-- Body
+local body = Instance.new("Frame")
+body.Size = UDim2.new(1, 0, 1, -62)
+body.Position = UDim2.new(0, 0, 0, 32)
+body.BackgroundTransparency = 1
+body.Parent = frame
+
+-- Key TextBox
+local keyBox = Instance.new("TextBox")
+keyBox.Size = UDim2.new(0.9, 0, 0, 38)
+keyBox.Position = UDim2.new(0.05, 0, 0, 30)
+keyBox.BackgroundColor3 = Color3.fromRGB(30, 0, 30)
+keyBox.BackgroundTransparency = 0.2
+keyBox.PlaceholderText = "Enter key..."
+keyBox.Text = ""
+keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+keyBox.Font = Enum.Font.GothamBold
+keyBox.TextSize = 16
+keyBox.ClearTextOnFocus = false
+keyBox.Parent = body
+
+local boxCorner = Instance.new("UICorner", keyBox)
+boxCorner.CornerRadius = UDim.new(0, 8)
+
+local boxStroke = Instance.new("UIStroke", keyBox)
+boxStroke.Thickness = 2
+local boxGradient = Instance.new("UIGradient")
+boxGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 0, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 150))
+}
+boxGradient.Rotation = 90
+boxGradient.Parent = boxStroke
+
+-- Confirm Button
+local confirmBtn = Instance.new("TextButton")
+confirmBtn.Text = "Confirm"
+confirmBtn.Size = UDim2.new(0.9, 0, 0, 38)
+confirmBtn.Position = UDim2.new(0.05, 0, 0, 80)
+confirmBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 80)
+confirmBtn.BackgroundTransparency = 0.1
+confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmBtn.Font = Enum.Font.GothamBold
+confirmBtn.TextSize = 18
+confirmBtn.Parent = body
+
+local btnCorner = Instance.new("UICorner", confirmBtn)
+btnCorner.CornerRadius = UDim.new(0, 8)
+
+local btnStroke = Instance.new("UIStroke", confirmBtn)
+btnStroke.Thickness = 2
+local btnGradient = Instance.new("UIGradient")
+btnGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(150, 0, 150)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200, 0, 200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 0, 150))
+}
+btnGradient.Rotation = 90
+btnGradient.Parent = btnStroke
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.Position = UDim2.new(0, 0, 1, -30)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = ""
+statusLabel.TextColor3 = Color3.fromRGB(255, 100, 255)
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextSize = 16
+statusLabel.Parent = frame
+
+-- Minimize logic
+local minimized = false
+local fullSize = frame.Size
+local tweenInfo = TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+minimize.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        TweenService:Create(frame, tweenInfo, {Size = UDim2.new(0, 300, 0, 32)}):Play()
+        body.Visible = false
+        statusLabel.Visible = false
+    else
+        TweenService:Create(frame, tweenInfo, {Size = fullSize}):Play()
+        task.wait(0.25)
+        body.Visible = true
+        statusLabel.Visible = true
+    end
+end)
+
+-- Confirm button logic
+confirmBtn.MouseButton1Click:Connect(function()
+    local input = keyBox.Text:gsub("%s+", ""):gsub("%-", ""):lower()
+    
+    if validKeys[input] then
+        statusLabel.Text = "Key Accepted! Loading VoidHub..."
+        statusLabel.TextColor3 = Color3.fromRGB(0, 255, 100)
+        task.wait(1.5)
+        
+        -- Execute the requested script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/supleq/voidhub/refs/heads/main/source"))()
+        
+        gui:Destroy()  -- Close the key GUI
+    else
+        statusLabel.Text = "Invalid Key"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+        task.delay(3, function()
+            if statusLabel.Text == "Invalid Key" then
+                statusLabel.Text = ""
+            end
+        end)
+    end
+end)
