@@ -4,6 +4,7 @@
 -- • Rapid tool switching
 -- • Missing tool alerts
 -- • Clean stop on arrival (zero velocity) + 1 second delay before kick (no anchor)
+-- • Teleport 30 studs above the collect zone (modified to target above "Collect Zone" instead of base sign)
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -265,6 +266,38 @@ local function findSignForPlayer(name)
     end
 end
 
+-- Find collect zone closest to the given sign part
+local function findCollectZone(signPart)
+    local candidates = {}
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BillboardGui") or obj:IsA("SurfaceGui") then
+            for _, child in ipairs(obj:GetDescendants()) do
+                if child:IsA("TextLabel") and string.lower(child.Text) == "collect zone" then
+                    if obj.Parent and obj.Parent:IsA("BasePart") then
+                        table.insert(candidates, obj.Parent)
+                    end
+                end
+            end
+        elseif obj:IsA("TextLabel") and obj.Parent and obj.Parent:IsA("BasePart") then
+            if string.lower(obj.Text) == "collect zone" then
+                table.insert(candidates, obj.Parent)
+            end
+        end
+    end
+    if #candidates == 0 then return nil end
+    -- Find closest to signPart
+    local closest = candidates[1]
+    local minDist = (signPart.Position - candidates[1].Position).Magnitude
+    for i = 2, #candidates do
+        local dist = (signPart.Position - candidates[i].Position).Magnitude
+        if dist < minDist then
+            minDist = dist
+            closest = candidates[i]
+        end
+    end
+    return closest
+end
+
 -- Final clean-stop steal function
 local function performSteal(targetPos, feedbackButton)
     local char = player.Character
@@ -376,8 +409,8 @@ local function performSteal(targetPos, feedbackButton)
         feedbackButton.Text = "Stolen!"
     end
 
-    -- Stay standing still for 1 second
-    task.wait(1)
+    -- Stay standing still for 4 seconds
+    task.wait(4)
 
     player:Kick("discord.gg/2yYuqnxbzu insta steal TAXED WITH VOIDHUB INSTA STEAL")
 end
@@ -385,17 +418,23 @@ end
 -- TP to Base
 tpBase.MouseButton1Click:Connect(function()
     local name = player.DisplayName or player.Name
-    local part = findSignForPlayer(name) or findSignForPlayer(player.Name)
-    if part then
-        local targetPos = Vector3.new(part.Position.X, part.Position.Y - 12, part.Position.Z)
-        performSteal(targetPos, tpBase)
+    local signPart = findSignForPlayer(name) or findSignForPlayer(player.Name)
+    if signPart then
+        local collectPart = findCollectZone(signPart)
+        if collectPart then
+            local targetPos = Vector3.new(collectPart.Position.X, collectPart.Position.Y + 30, collectPart.Position.Z)
+            performSteal(targetPos, tpBase)
+        else
+            tpBase.Text = "No collect zone found!"
+            task.delay(2, function() tpBase.Text = "TP to base" end)
+        end
     else
         tpBase.Text = "No sign found!"
         task.delay(2, function() tpBase.Text = "TP to base" end)
     end
 end)
 
--- Instant Steal (same as before)
+-- Instant Steal
 local instantStealEnabled = false
 local function setupPrompt(prompt)
     if not prompt:IsA("ProximityPrompt") then return end
@@ -404,10 +443,18 @@ local function setupPrompt(prompt)
             local char = player.Character or player.CharacterAdded:Wait()
             local hrp = char:WaitForChild("HumanoidRootPart")
             local name = player.DisplayName or player.Name
-            local part = findSignForPlayer(name) or findSignForPlayer(player.Name)
-            if part then
-                local targetPos = Vector3.new(part.Position.X, part.Position.Y - 12, part.Position.Z)
-                performSteal(targetPos, instantSteal)
+            local signPart = findSignForPlayer(name) or findSignForPlayer(player.Name)
+            if signPart then
+                local collectPart = findCollectZone(signPart)
+                if collectPart then
+                    local targetPos = Vector3.new(collectPart.Position.X, collectPart.Position.Y + 30, collectPart.Position.Z)
+                    performSteal(targetPos, instantSteal)
+                else
+                    instantSteal.Text = "No collect zone found!"
+                    task.delay(2, function()
+                        instantSteal.Text = instantStealEnabled and "Instant steal (ON)" or "Instant steal (OFF)"
+                    end)
+                end
             else
                 instantSteal.Text = "No sign found!"
                 task.delay(2, function()
@@ -425,9 +472,6 @@ instantSteal.MouseButton1Click:Connect(function()
     instantStealEnabled = not instantStealEnabled
     instantSteal.Text = instantStealEnabled and "Instant steal (ON)" or "Instant steal (OFF)"
 end)
-
--- Desync, Speed, Map ESP, My Base ESP, Initial setup, Respawn cleanup (all unchanged from previous version)
--- [Same code as in the last full script I sent — no changes needed there]
 
 -- Desync
 local desyncEnabled = false
@@ -571,11 +615,13 @@ local function enableMyBaseEsp()
     if not hrp then return end
     local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("LowerTorso") or char:FindFirstChild("Torso") or hrp
     local name = player.DisplayName or player.Name
-    local part = findSignForPlayer(name) or findSignForPlayer(player.Name)
-    if not part or not part:IsA("BasePart") then return end
+    local signPart = findSignForPlayer(name) or findSignForPlayer(player.Name)
+    if not signPart or not signPart:IsA("BasePart") then return end
+    local collectPart = findCollectZone(signPart)
+    if not collectPart or not collectPart:IsA("BasePart") then return end
     
     lineAtt0 = Instance.new("Attachment", torso)
-    lineAtt1 = Instance.new("Attachment", part)
+    lineAtt1 = Instance.new("Attachment", collectPart)
     lineBeam = Instance.new("Beam")
     lineBeam.Attachment0 = lineAtt0
     lineBeam.Attachment1 = lineAtt1
