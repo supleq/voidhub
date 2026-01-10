@@ -6,7 +6,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 -- Valid keys (case-insensitive, ignores dashes/spaces)
 local validKeys = {
-    ["Yn5iQ9kR3br0eP2bY1au8"] = true,  -- Ejwm-eusk-KenH-Kwpq-ZkZu
+    ["ujejfiwkgtogkdjwgcugjevw"] = true,  -- Ejwm-eusk-KenH-Kwpq-ZkZu
     ["jnco"] = true
 }
 
