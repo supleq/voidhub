@@ -410,9 +410,9 @@ local function performSteal(targetPos, feedbackButton)
     end
 
     -- Stay standing still for 4 seconds
-    task.wait(4)
+    task.wait(1)
 
-    player:Kick("discord.gg/2yYuqnxbzu insta steal TAXED WITH VOIDHUB INSTA STEAL")
+    player:Kick("EZ tax with voidhub insta steal discord.gg/2yYuqnxbzu")
 end
 
 -- TP to Base
